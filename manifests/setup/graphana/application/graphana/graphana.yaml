@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grafana
+
+#  annotations:
+#    elbv2.k8s.aws/pod-readiness-gate-inject: enabled
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+  labels:
+      name: grafana
+spec:
+  project: default
+  sources:
+    - repoURL: git@github.com:matiss-baldonis/kube-grafana.git
+      path: manifests/setup
+      targetRevision: HEAD
+      directory:
+          recurse: true
+  destination:
+      server: https://kubernetes.default.svc
+      namespace: grafana
+
+  syncPolicy:
+      # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      automated:
+          # Specifies if resources should be pruned during auto-syncing ( false by default ).
+          prune: true
+          # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+          selfHeal: true
+      # Sync options which modifies sync behavior
+      syncOptions:
+          # disables resource validation (equivalent to 'kubectl apply --validate=false') ( true by default ).
+          - Validate=false
+          # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.
+          - CreateNamespace=true
+          # Supported policies are background, foreground and orphan.
+          - PrunePropagationPolicy=foreground
+          # Allow the ability for resource pruning to happen as a final, implicit wave of a sync operation
+          - PruneLast=true
+          - ServerSideApply=true
+          - Replace=true
+      retry:
+          limit: 5
+          backoff:
+              duration: 5s
+              factor: 1
+              maxDuration: 3m
+  revisionHistoryLimit: 10
