@@ -51,3 +51,6 @@ spec:
               factor: 1
               maxDuration: 3m
   revisionHistoryLimit: 10
+  ignoreDifferences:
+      - group: io.k8s.api.core.v1
+        kind: PersistentVolumeClaim
