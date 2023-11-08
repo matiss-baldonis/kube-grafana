@@ -43,7 +43,6 @@ spec:
           # Allow the ability for resource pruning to happen as a final, implicit wave of a sync operation
           - PruneLast=true
           - ServerSideApply=true
-          - Replace=true
       retry:
           limit: 5
           backoff:
@@ -51,6 +50,3 @@ spec:
               factor: 1
               maxDuration: 3m
   revisionHistoryLimit: 10
-  ignoreDifferences:
-      - group: io.k8s.api.core.v1
-        kind: PersistentVolumeClaim
